@@ -1,38 +1,26 @@
+version: "3.8"
 services:
-
-  mysql:
-    image: mysql:8
+  mysql-db:
+    image: mysql:8.0
     container_name: mysql-db
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: employeedb_v2
+      MYSQL_DATABASE: dockerdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  backend:
-    build: ./Employee-backend
-    container_name: employee-backend
-    restart: always
+ 
+  spring-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-container
     ports:
-      - "8080:8080"
+      - "8900:8080"
     depends_on:
-      - mysql
+      - mysql-db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/employeedb_v2
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/employeedb_v2?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-
-  frontend:
-    build: ./employee-frontend
-    container_name: employee-frontend
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-
-volumes:
-  mysql_data:
